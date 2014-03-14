@@ -1,3 +1,10 @@
+#### CUSTOM ####
+# raw downloads from CMU
+raw/
+# processed courses are not okay because the scraper may regenerate
+# them, but processed indexes are okay
+processed/course/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
