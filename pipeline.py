@@ -129,7 +129,88 @@ class Course(object):
 
   @classmethod
   def parse_prereqs(cls, prereqs):
-    return prereqs
+    if prereqs == 'None':
+      return ['or']
+    # There are faulty prereq values, here is handling them manually
+    if prereqs == "(21212 or 21116 or 21112 or 21120) and (36201 or 70207 or 36310 or 36220 or 36247) and (73100 or (73110)":
+      prereqs = "(21212 or 21116 or 21112 or 21120) and (36201 or 70207 or 36310 or 36220 or 36247) and (73100 or 73110)"
+    if prereqs == "(18300 and 18320) or (18300 and 18491) or (18310 and 18320) or (18310 and 18491) or (18491 and 18320) or (18300 and 18421) or (18310 and 18421) or (18":
+      prereqs = "(18300 and 18320) or (18300 and 18491) or (18310 and 18320) or (18310 and 18491) or (18320 and 18491) or (18300 and 18421) or (18310 and 18421) or (18401 and 18320) or (18402 and 18320) or (18401 and 18421) or (18402 and 18421) or (18401 and 18491) or (18402 and 18491) or (18419 and 18320) or (18419 and 18421) or (18419 and 18491) or (18421 and 18491)"
+    if prereqs == "(18348 and 18320) or (18348 and 18391) or (18349 and 18320) or (18349 and 18391) or (18320 and 18391) or (18320 and 18340) or (18320 and 18341) or (18":
+      prereqs = "(18320 or 18370 or 18491) and (18340 or 18341 or 18348 or 18349)"
+    if prereqs == "(18340 and 18341) or (18340 and 18348) or (18340 and 18349) or (18340 and 18447) or (18341 and 18348) or (18341 and 18349) or (18341 and 18447) or (18":
+      prereqs = "18447 or (18340 and 18341) or (18340 and 18348) or (18340 and 18349) or (18340 and 18320) or (18341 and 18348) or (18341 and 18349) or (18341 and 18320) or (18348 and 18320) or (18349 and 18320)"
+    
+    # preprocess
+    token_pattern = r"(\(|\)|\d{5,5}|and|or)"
+    # tokenize
+    prereqs = re.sub(r"\((\d{5,5})\)", r"\1", prereqs.lower())
+    tokens = re.split(token_pattern, prereqs)
+    tokens = [tok for tok in tokens if re.match(token_pattern, tok)]
+    
+    # shunting yard algorithm
+    queue = []
+    stack = []
+    for tok in tokens:
+      if re.match(r"\d{5,5}", tok):
+        queue.append(tok)
+      elif tok in ['and', 'or']:
+        while stack:
+          if (tok == 'or' and stack[-1] == 'and') or (tok == stack[-1]):
+            queue.append(stack.pop())
+          else:
+            break
+        stack.append(tok)
+      elif tok == '(':
+        stack.append(tok)
+      elif tok == ')':
+        if not stack:
+          raise ValueError
+        while stack[-1] != '(':
+          queue.append(stack.pop())
+        stack.pop()
+    while stack:
+      if stack[-1] == '(' or stack[-1] == ')':
+        raise ValueError
+      queue.append(stack.pop())
+    
+    # create the tree
+    construct = []
+    for item in queue:
+      if re.match(r"\d{5,5}", item):
+        construct.append(item)
+      else: # and or
+        if len(construct) < 2:
+          raise ValueError
+        v2 = construct.pop()
+        v1 = construct.pop()
+        construct.append([item, v1, v2])
+    if len(construct) != 1:
+      raise ValueError
+    tree = construct[0]
+    if type(tree) is str:
+      return ['or', tree]
+    
+    # collapse the tree
+    return cls.collapse_tree(tree)
+  
+  @classmethod
+  def collapse_tree(cls, tree):
+    if type(tree) is str:
+      return tree
+    op, items = tree[0], tree[1:]
+    new_tree = [op]
+    for item in items:
+      if type(item) is str:
+        new_tree.append(item)
+      else:
+        collapsed = cls.collapse_tree(item)
+        if op == collapsed[0]:
+          new_tree.extend(collapsed[1:])
+        else:
+          new_tree.append(collapsed)
+    return new_tree
+
 
   def scrape_course(self, infile, outfile):
     try:
@@ -137,8 +218,12 @@ class Course(object):
         html = f.read()
       
       data = {'number': self.number}
-      soup = bs4.BeautifulSoup(html)
+      soup = bs4.BeautifulSoup(html, "html5lib")
       
+      # detect java.lang.NullPointerException
+      if soup.title and "Apache" in soup.title.string:
+        print("NPE", infile)
+        return False
       # course name
       info = soup.find(class_='with-data')
       name = info['data-maintitle']
@@ -147,7 +232,11 @@ class Course(object):
       # session
       data['session'] = info['data-subtitle']
       # description
-      description = soup.select('#course-detail-description > p')[0]
+      descriptions = soup.select('#course-detail-description > p')
+      if not descriptions:
+        print("INCOMPLETE", infile)
+        return False
+      description = descriptions[0]
       contents = description.encode_contents()
       contents = contents.decode(encoding='UTF-8')
       data['description'] = re.sub(r"\s+", ' ', contents)
@@ -160,14 +249,21 @@ class Course(object):
           value = definition.encode_contents()
           value = value.decode(encoding='UTF-8').strip()
           if label == 'Prerequisites':
-            data['prerequisites'] = self.parse_prereqs(value) # todo: tree
+            try:
+              data['prerequisites'] = self.parse_prereqs(value)
+            except ValueError as e:
+              print("Mismatched prereq parens", infile)
+              return False
           elif label == 'Corequisites':
             if value == 'None':
-              data['corequisites'] = []
+              data['corequisites'] = ['or']
             else:
-              data['corequisites'] = [s.strip() for s in value.split(' , ')]
+              data['corequisites'] = ['or'] + [s.strip() for s in value.split(' , ')]
           elif label == 'Notes':
-            data['notes'] = re.sub(r"\s+", ' ', value)
+            if value == 'None':
+              data['notes'] = ""
+            else:
+              data['notes'] = re.sub(r"\s+", ' ', value)
           elif label == 'Cross-Listed Courses':
             if value == 'None':
               data['crosslisted'] = []
@@ -222,7 +318,10 @@ class Course(object):
         meeting['days'] = list(cells[4+session].stripped_strings)[0]
         meeting['begin'] = list(cells[5+session].stripped_strings)[0]
         meeting['end'] = list(cells[6+session].stripped_strings)[0]
-        meeting['campus'] = list(cells[7+session].stripped_strings)[0]
+        if not list(cells[7+session].stripped_strings):
+            meeting['campus'] = ""
+        else:
+          meeting['campus'] = list(cells[7+session].stripped_strings)[0]
         meeting['room'] = list(cells[8+session].stripped_strings)[0]
         instructors = cells[9+session]('li')
         if instructors:
@@ -249,9 +348,12 @@ class Course(object):
           section = cells[0].string.strip()
           if section not in data['reservations']:
             data['reservations'][section] = []
-          department = cells[1].string.strip()
-          department = department.replace('Some reservations are for', '')
-          department = re.sub(r"\s+", ' ', department)
+          if not cells[1].string:
+            department = ""
+          else:
+            department = cells[1].string.strip()
+            department = department.replace('Some reservations are for', '')
+            department = re.sub(r"\s+", ' ', department)
           data['reservations'][section].append(department.strip())
       with io.open(outfile, 'w', encoding='utf8') as f:
         json.dump(data, f, ensure_ascii=False)
@@ -287,32 +389,28 @@ class Course(object):
 
     return self.parse_course(processed_path)
 
-def get_all(tags):
+def get_all(tags, log=sys.stderr):
   num_tags = len(tags)
   for i, tag in enumerate(tags):
     index = Index(tag, force_download=False, force_scrape=False)
     print("{} ({} of {})".format(tag, i+1, num_tags))
     numbers = index.get()
     if not numbers:
-      print("Error getting list of courses for", tag)
+      print("Error getting list of courses for", tag, file=log)
       continue
     
     num_courses = len(numbers)
-    for j, number in enumerate(numbers):
-      course = Course(tag, number, force_download=False, force_scrape=True)
+    for j, number in enumerate(sorted(numbers)):
+      course = Course(tag, number, force_download=False, force_scrape=False)
       data = course.get()
       print("{} {} ({} of {})".format(tag, number, j+1, num_courses))
       if not data:
-        print("Error getting data for", tag, number)
+        print("Error getting data for", tag, number, file=log)
 
 if __name__ == '__main__':
   tags = ['S06', 'M06', 'F06', 'S07', 'M07', 'F07', 'S08', 'M08', 'F08',
-      'S09', 'M09', 'F09', 'S10', 'M10', 'F10', 'S11', 'M11', 'F11',
-      'S12', 'M12', 'F12', 'S13', 'M13', 'F13', 'S14', 'M14', 'F14']
+          'S09', 'M09', 'F09', 'S10', 'M10', 'F10', 'S11', 'M11', 'F11',
+          'S12', 'M12', 'F12', 'S13', 'M13', 'F13', 'S14', 'M14', 'F14']
 
-  #get_all(tags)
-
-  tests = [('S14', '15221'), ('F13', '99101'), ('F13', '15210'), ('F13', '76101'), ('S14', '15112'), ('F13', '82135'), ('S14', '10601'), ('S14', '15214')]
-  for tag, course in tests:
-    c = Course(tag, course, force_scrape=True).get()
-    print(json.dumps(c, indent=4))
+  with open('pipeline.log', 'w') as f:
+    get_all(tags, log=f)
