@@ -327,7 +327,7 @@ class Course(object):
         if instructors:
           meeting['instructors'] = [ins.string.strip() for ins in instructors]
         else:
-          meeting['instructors'] = cells[9+session].find('em').string.strip()
+          meeting['instructors'] = []
         if lecture == section:
           data['lectures'][lecture]['meetings'].append(meeting)
         else:
@@ -401,7 +401,7 @@ def get_all(tags, log=sys.stderr):
     
     num_courses = len(numbers)
     for j, number in enumerate(sorted(numbers)):
-      course = Course(tag, number, force_download=False, force_scrape=False)
+      course = Course(tag, number, force_download=False, force_scrape=True)
       data = course.get()
       print("{} {} ({} of {})".format(tag, number, j+1, num_courses))
       if not data:
