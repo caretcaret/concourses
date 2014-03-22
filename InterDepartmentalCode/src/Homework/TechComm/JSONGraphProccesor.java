@@ -1,20 +1,15 @@
 package Homework.TechComm;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintStream;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
-
 import External_Libraries.JSON.JSONArray;
 import External_Libraries.JSON.JSONObject;
-import External_Libraries.JSON.parser.JSONParser;
 
 import static Homework.TechComm.Print.*;
 
@@ -39,12 +34,18 @@ public class JSONGraphProccesor
 	public JSONGraphProccesor()
 	{
 		
-		File dir = FileIO.parseFile("course", "F06");
+		File dir = FileIO.parseFile("course");
 		
+		File[] dirs = dir.listFiles();
+	
+		ArrayUtil.reverse(dirs);
+	
 		// Compute the directories for each semester we want to process.
-		proccessCourses(dir);
-
+		proccessCourses(dirs);
+		System.out.println("Done");
 	}
+	
+	
 	
 	/*
 	 * REQUIRES : A list of semesters in reverse chronological order.
@@ -62,7 +63,7 @@ public class JSONGraphProccesor
 		// Used to store all of the counting information for all of the departments.
 		DepartmentCounter counter = new DepartmentCounter();
 		
-		int num_departments = 59;
+		int num_departments = 63;
 		int[][] reqrs = new int[num_departments][num_departments];
 		
 		for(File s : semesters)
@@ -93,8 +94,7 @@ public class JSONGraphProccesor
 				
 				// Count this course.
 				counter.addCourseDepartment(department_number);
-				
-				
+								
 				// -- Interdepartmental coreqr / prereqr counting.
 
 				// Corequisites
@@ -106,6 +106,7 @@ public class JSONGraphProccesor
 				msg	 = (JSONArray) course.get("prerequisites");
 				iter = msg.iterator();
 				countReqrs(reqrs, iter, department_number);
+				
 			}
 		}
 		
@@ -161,7 +162,7 @@ public class JSONGraphProccesor
 		
 	}
 	
-
+	//public static int index = -1;
 	
 	// Keeps track of data specific to individual departments.
 	private class DepartmentEntry
@@ -186,8 +187,8 @@ public class JSONGraphProccesor
 		
 		public String toString()
 		{
-			// index++;
-			// return "case " + myDepartmentPrefix + ": return " + index + ";";
+			//index++;
+			//return "case " + myDepartmentPrefix + ": return " + index + ";";
 			return "department = " + myDepartmentPrefix + ", count = " + count;
 		}
 		
