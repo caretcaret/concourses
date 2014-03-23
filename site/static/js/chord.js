@@ -9,7 +9,7 @@ function ChordDiagram() {
   var height;
   var outerRadius;
   var innerRadius;
-  var fill = d3.scale.category20b();
+  var fill;
   var arc;
   var deptArcs;
   var deptTexts;
@@ -21,6 +21,9 @@ function ChordDiagram() {
     depts = data.info;
     adjacency = data.adjacency;
 
+    // dept to color mapper
+    fill = d3.scale.category20b();
+
     // set up chord layout
     chord
       .matrix(adjacency)
@@ -31,12 +34,14 @@ function ChordDiagram() {
     svg
       .attr('width', width)
       .attr('height', height);
+
     // for centering offset
     svgGroup = svg
       .append('g')
-      .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')');
+      .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')')
+      .on('mouseleave', showAllChords);
 
-    // populate data
+    // populate data into svg
     var g = svgGroup.selectAll('.group')
       .data(chord.groups)
     .enter().append('g')
@@ -49,7 +54,8 @@ function ChordDiagram() {
     deptArcs = g.append('path')
       .style('fill', function(d) { return d3.rgb(fill(d.index)).darker(); })
       .style('stroke', function(d) { return fill(d.index); })
-      .attr('d', arc);
+      .attr('d', arc)
+      .on('mouseenter', hideUnrelatedChords);
 
     deptTexts = g.append('text')
       .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
@@ -70,6 +76,42 @@ function ChordDiagram() {
       .style('stroke', function(d) { return d3.rgb(fill(d.source.index)).darker(); })
       .style('fill', function(d) { return fill(d.source.index); })
       .attr('d', d3.svg.chord().radius(innerRadius));
+
+    // add table of departments to sidebar so that it can interact with the svg
+    var table = d3.select('#sidebar').append('table')
+      .attr('class', 'table table-striped table-hover');
+    var header = table.append('thead').append('tr');
+    header.append('td').text('#');
+    header.append('td').text('Abbreviation');
+    header.append('td').text('Name');
+    header.append('td').text('Number of courses');
+
+    var rows = table.append('tbody')
+    .selectAll('tr')
+      .data(depts)
+    .enter().append('tr')
+      .on('mouseover', hideUnrelatedChords)
+      .on('mouseleave', showAllChords);
+
+    rows.append('td')
+      .text(function(d) { return d.number; });
+    rows.append('td')
+      .style('color', function(d, i) { return d3.rgb(fill(i)).darker(); })
+      .text(function(d) { return d.code; });
+    rows.append('td')
+      .text(function(d) { return d.name; });
+    rows.append('td')
+      .text(function(d) { return d.count; });
+  }
+
+  function hideUnrelatedChords(d, i) {
+    deptChords.classed('fade', function(p) {
+      return p.source.index != i && p.target.index != i;
+    });
+  }
+
+  function showAllChords(d, i) {
+    deptChords.classed('fade', false);
   }
 
   function initSize() {
@@ -129,8 +171,6 @@ d3.json('/static/data/departments.json', function(data) {
       return other * data.info[i].count / reqSums[i];
     });
   });
-
-  console.log(data.adjacency);
 
   viz(document.querySelector('#main svg'), data);
 });
