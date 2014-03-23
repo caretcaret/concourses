@@ -2,9 +2,10 @@
 # raw downloads from CMU
 raw/
 # processed courses are not okay because the scraper may regenerate them
-processed/
-# graph should be regenerated
-site/static/data/graph.json
+processed/course/
+processed/index/
+# data should be regenerated
+site/static/data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

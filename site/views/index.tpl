@@ -64,6 +64,6 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
-    <script src="/static/js/main.js"></script>
+    <script src="/static/js/chord.js"></script>
   </body>
 </html>

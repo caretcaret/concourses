@@ -45,13 +45,22 @@ body {
     display: block;
     overflow-x: hidden;
     overflow-y: auto;
-    padding: 0;
   }
   #main svg {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
   }
+}
+#main {
+	padding: 0;
+}
+#main svg {
+	width: 100%;
+	height: 100%;
+}
+
+/* svg specific */
+.chord {
+	fill-opacity: .67;
 }
