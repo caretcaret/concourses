@@ -1,0 +1,60 @@
+ 31 AFR Aerospace Studies
+ 48 ARC Architecture
+ 60 ART Art
+ 52 BXA BXA Intercollege Degree Programs
+ 03 BSC Biological Sciences
+ 42 BMD Biomedical Engineering
+ 70 BA Business Administration
+ 62 CFA CFA Interdisciplinary
+ 39 CIT CIT Interdisciplinary
+ 99 CMU Carnegie Mellon University-Wide Studies
+ 64 CAS Center for the Arts in Society
+ 86 CNB Center for the Neural Basis of Cognition
+ 06 CHE Chemical Engineering
+ 09 CMY Chemistry
+ 12 CEE Civil and Environmental Engineering
+ 02 CB Computational Biology
+ 15 CS Computer Science
+ 93 CRM Creative Enterprise
+ 51 DES Design
+ 67 ISH Dietrich College Information Systems
+ 66 HSS Dietrich College Interdisciplinary
+ 54 DRA Drama
+ 73 ECO Economics
+ 18 ECE Electrical and Computer Engineering
+ 20 IAE Electronic Commerce
+ 19 EPP Engineering and Public Policy
+ 76 ENG English
+ 53 ETC Entertainment Technology
+ 65 H00 General Dietrich College
+ 94 HC Heinz College
+ 79 HIS History
+ 05 HCI Human-Computer Interaction
+ 04 ICT Information and Communication Technology
+ 14 INI Information Networking Institute
+ 95 ISM School of Information Systems and Management
+ 08 ISR Institute for Software Research
+ 11 LTI Language Technologies Institute
+ 38 MCS MCS Interdisciplinary
+ 10 MLG Machine Learning
+ 27 MSE Materials Science and Engineering
+ 21 MSC Mathematical Sciences
+ 24 MEG Mechanical Engineering
+ 92 MED Medical Management
+ 30 MST Military Science
+ 82 ML Modern Languages
+ 57 MUS Music
+ 32 NVS Naval Science
+ 80 PHI Philosophy
+ 69 PE Physical Education
+ 33 PHY Physics
+ 85 PSY Psychology
+ 91 PMP Public Management
+ 90 PPP Public Policy and Management
+ 16 ROB Robotics
+ 96 SV Silicon Valley
+ 88 SDS Social and Decision Sciences
+ 17 SE Software Engineering
+ 36 STA Statistics
+ 98 STU StuCo
+ 45 IA Tepper School of Business
