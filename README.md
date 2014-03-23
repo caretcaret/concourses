@@ -16,8 +16,12 @@ You should end up with a folder `processed` with a bunch of `.json` files. If th
 ## Running the website
 Install the necessary packages with `make install-site`.
 
+If you haven't already, unpack the course data with `make unpack-processed`.
+
+Then, convert the course data into a format required by the website by running `python3 construct.py`.
+
 If you want, set a port number with `export PORT=<number>`. The default port is `8080`.
 
 For development, just run `python site/main.py` and go to `http://localhost:<port number>`.
 
-Sometimes, on a force quit with <kbd>Ctrl</kbd><kbd>C</kbd>, the bottle server doesn't release its port. On Mac OS X, you can run `lsof -i :<port number>` and `kill <pid>` to kill the python process.
+Sometimes, on a force quit with <kbd>Ctrl</kbd>+<kbd>C</kbd>, the bottle server doesn't actually stop and it doesn't release its port. On Mac OS X, you can run `lsof -i :<port number>` and `kill <pid>` to kill the python process.
