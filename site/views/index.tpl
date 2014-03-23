@@ -49,7 +49,10 @@
       <div class="col-sm-5 col-md-5" id="sidebar">
         <h3 class="page-header"><i class="fa fa-info-circle"></i> Welcome!</h3>
         <p><strong>concourses</strong> is a new way to explore courses offered at Carnegie Mellon University.</p>
-        <!-- insert stuff here -->
+        <p>This page visualizes the interdisciplinary nature of Carnegie Mellon. Each ribbon connecting two departments represents the prerequisite and corequisite dependencies between courses within those departments.</p>
+
+        <h3 class="page-header" id="department_header"><i class="fa fa-book"></i> Departments</h3>
+        <!-- insert table here -->
       </div>
 
       <div class="col-sm-7 col-sm-offset-5 col-md-7 col-md-offset-5" id="main">
