@@ -52,10 +52,12 @@ function ChordDiagram() {
       .outerRadius(outerRadius);
 
     deptArcs = g.append('path')
+      .attr('class', 'arc')
       .style('fill', function(d) { return d3.rgb(fill(d.index)).darker(); })
       .style('stroke', function(d) { return fill(d.index); })
       .attr('d', arc)
-      .on('mouseenter', hideUnrelatedChords);
+      .on('mouseenter', hideUnrelatedChords)
+      .on('click', openCoursePage);
 
     deptTexts = g.append('text')
       .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
@@ -81,10 +83,10 @@ function ChordDiagram() {
     var table = d3.select('#sidebar').append('table')
       .attr('class', 'table table-striped table-hover');
     var header = table.append('thead').append('tr');
-    header.append('td').text('#');
-    header.append('td').text('Abbreviation');
-    header.append('td').text('Name');
-    header.append('td').text('Number of courses');
+    header.append('td').append('strong').text('#');
+    header.append('td').append('strong');
+    header.append('td').append('strong').text('Department name');
+    header.append('td').append('strong').text('Course count');
 
     var rows = table.append('tbody')
     .selectAll('tr')
@@ -96,9 +98,15 @@ function ChordDiagram() {
     rows.append('td')
       .text(function(d) { return d.number; });
     rows.append('td')
-      .style('color', function(d, i) { return d3.rgb(fill(i)).darker(); })
+      .style('text-align', 'center')
+    .append('span')
+      .attr('class', 'label')
+      .style('background-color', function(d, i) { return d3.rgb(fill(i)).darker(); })
+      .style('text-align', 'center')
+      .style('line-height', 'inherit')
+      .style('display', 'block')
       .text(function(d) { return d.code; });
-    rows.append('td')
+    rows.append('td').append('a').attr('href', function(d) { return '/courses/' + d.number; })
       .text(function(d) { return d.name; });
     rows.append('td')
       .text(function(d) { return d.count; });
@@ -112,6 +120,10 @@ function ChordDiagram() {
 
   function showAllChords(d, i) {
     deptChords.classed('fade', false);
+  }
+
+  function openCoursePage(d, i) {
+    window.location = '/courses/' + depts[i].number;
   }
 
   function initSize() {

@@ -3,8 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    % if defined('title'):
+    <title>concourses - {{title}}</title>
+    % else:
     <title>concourses</title>
+    % end
 
     <!-- Bootstrap -->
     <link href="//netdna.bootstrapcdn.com/bootswatch/3.1.1/yeti/bootstrap.min.css" rel="stylesheet">
@@ -30,15 +34,15 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">concourses</a>
+        <a class="navbar-brand" href="/">concourses</a>
       </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-left">
-          <li><a href="#">browse courses</a></li>
-          <li><a href="#">check requirements</a></li>
+          <li><a href="/courses">find courses</a></li>
+          <li><a href="/requirements">check requirements</a></li>
         </ul>
-        <form class="navbar-form navbar-right">
-          <input type="search" class="form-control" placeholder="Search">
+        <form class="navbar-form navbar-right" action="/courses" method="POST">
+          <input type="search" class="form-control" placeholder="Search" name="query">
         </form>
       </div>
     </div>
@@ -47,12 +51,7 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-5 col-md-5" id="sidebar">
-        <h3 class="page-header"><i class="fa fa-info-circle"></i> Welcome!</h3>
-        <p><strong>concourses</strong> is a new way to explore courses offered at Carnegie Mellon University.</p>
-        <p>This page visualizes the interdisciplinary nature of Carnegie Mellon. Each ribbon connecting two departments represents the prerequisite and corequisite dependencies between courses within those departments.</p>
-
-        <h3 class="page-header" id="department_header"><i class="fa fa-book"></i> Departments</h3>
-        <!-- insert table here -->
+        {{!base}}
       </div>
 
       <div class="col-sm-7 col-sm-offset-5 col-md-7 col-md-offset-5" id="main">
@@ -67,6 +66,8 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
-    <script src="/static/js/chord.js"></script>
+    % if defined('script'):
+    <script src="/static/js/{{script}}"></script>
+    % end
   </body>
 </html>
