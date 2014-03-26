@@ -1,6 +1,7 @@
 """Constructs the graph."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
 import os, sys
 import io
 import json
@@ -98,14 +99,16 @@ def construct_graph(tags, out_dir, out_index_file):
 
   try:
     with io.open(out_index_file, 'w') as f:
-      json.dump({'info': depts, 'adjacency': matrix}, f, ensure_ascii=False)
+      s = json.dumps({'info': depts, 'adjacency': matrix}, ensure_ascii=False)
+      f.write(s)
 
     if not os.path.exists(out_dir):
       os.makedirs(out_dir)
 
     for number in dept_graphs:
       with io.open(out_dir + number + '.json', 'w') as f:
-        json.dump(dept_graphs[number], f, ensure_ascii=False)
+        s = json.dumps(dept_graphs[number], ensure_ascii=False)
+        f.write(s)
   except Exception as e:
     print(e)
     return False
