@@ -1,7 +1,9 @@
-from bottle import route, post, run, request, template, static_file, redirect
+from bottle import route, post, run, request, template, static_file, redirect, TEMPLATE_PATH
 import os
 
 DEVELOPMENT = True
+HERE = os.path.dirname(os.path.realpath(__file__))
+TEMPLATE_PATH.insert(0, HERE + '/views/')
 
 @route('/')
 def home():
@@ -28,7 +30,7 @@ def requirements():
 
 @route('/static/<filepath:path>')
 def server_static(filepath):
-  return static_file(filepath, root='./static')
+  return static_file(filepath, root=HERE+'/static')
 
 run(host='localhost', port=int(os.environ.get("PORT", 8080)),
   reloader=DEVELOPMENT, debug=DEVELOPMENT)
