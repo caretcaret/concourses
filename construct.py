@@ -112,5 +112,6 @@ def construct_graph(tags, out_dir, out_index_file):
   return True
 
 if __name__ == '__main__':
+  print("Preparing data files for website...")
   construct_graph(['F10', 'S11', 'M11', 'F11', 'S12', 'M12', 'F12', 'S13', 'M13', 'F13', 'S14', 'M14', 'F14'],
     './site/static/data/department/', './site/static/data/departments.json')

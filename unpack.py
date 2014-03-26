@@ -2,6 +2,7 @@ import tarfile
 import os, sys
 
 def untar(filename):
+  print("Unpacking", filename)
   try:
     tar = tarfile.open(filename)
     tar.extractall()

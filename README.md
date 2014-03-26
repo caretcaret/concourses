@@ -25,3 +25,19 @@ If you want, set a port number with `export PORT=<number>`. The default port is 
 For development, just run `python site/main.py` and go to `http://localhost:<port number>`.
 
 Sometimes, on a force quit with <kbd>Ctrl</kbd>+<kbd>C</kbd>, the bottle server doesn't actually stop and it doesn't release its port. On Mac OS X, you can run `lsof -i :<port number>` and `kill <pid>` to kill the python process.
+
+## Alternate instructions
+Make sure to have Python 3.4.0 or later.
+`python3 -m venv <myenv>`
+`cd <myenv>`
+`source bin/activate` for bash, or `Scripts/activate.bat` for Windows
+`git clone https://github.com/dylu/techcomm.git`
+`cd techcomm`
+`pip install -r requirements.txt`
+`python unpack.py processed`
+`python construct.py`
+`python site/main.py`
+
+...
+
+`deactivate`
