@@ -12,7 +12,7 @@ INDEX_PROCESSED_DIRECTORY = 'processed/index/'
 COURSE_RAW_DIRECTORY = 'raw/course/'
 COURSE_PROCESSED_DIRECTORY = 'processed/course/'
 DEPARTMENTS_FILE = 'processed/departments.txt'
-
+SITES_DATA_DIRECTORY = 'site/static/data/'
 
 def parse_course(infile):
   try:
@@ -48,6 +48,13 @@ def dept_info():
   return depts
 
 def construct_graph(tags, out_dir, out_index_file):
+  # make missing directories
+  if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
+  out_index_dir = os.path.dirname(out_index_file)
+  if not os.path.exists(out_index_dir):
+    os.makedirs(out_index_dir)
+  
   depts = dept_info()
   for dept in depts:
     dept['count'] = 0
