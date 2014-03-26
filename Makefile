@@ -1,11 +1,9 @@
 all:
 
 install-scrape:
-	pip install requests
-	pip install beautifulsoup4
-	pip install html5lib
+	pip install -r scrape-req.txt
 install-site:
-	pip install bottle
+	pip install -r requirements.txt
 unpack-raw:
 	tar xzvf raw.tgz
 unpack-processed:
