@@ -160,7 +160,7 @@ function ChordDiagram() {
 
 var viz = ChordDiagram();
 
-d3.json('/static/data/departments.json', function(data) {
+d3.json('/data/departments', function(data) {
   // the matrix in the data only corresponds to prereqs and coreqs, and
   // does not reflect the size of the department by course count. Here,
   // we do a mathematically questionable hack to redistribute the weights
