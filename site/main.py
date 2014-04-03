@@ -16,6 +16,7 @@ def home():
   return template('home')
 
 @route('/courses')
+@route('/courses/')
 @route('/courses/<query:path>')
 def courses(query=""):
   # query should be a comma separated list of departments, course
@@ -37,15 +38,15 @@ def requirements():
 # serve this one file statically
 @route('/data/departments')
 def data_departments():
-	return static_file('data/departments.json', root=HERE+'/static')
+  return static_file('data/departments.json', root=HERE+'/static')
 
-@route('/data')
+@post('/data')
 def data():
-	if not request.json:
-		return {}
+  if not request.json:
+    return {'courses': [], 'instances': []}
 
-	result = db.courses.find({'name': {'$regex': 'non-majors', '$options': 'i'}})
-	return json_util.dumps({'courses': result})
+  result = db.courses.find(request.json)
+  return json_util.dumps({'courses': result})
 
 @route('/static/<filepath:path>')
 def server_static(filepath):
