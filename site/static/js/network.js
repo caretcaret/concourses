@@ -80,11 +80,20 @@ function Network() {
     .append('path')
       .attr('d', 'M0,-5L10,0L0,5');
     // set up force
+    /*force = cola.d3adaptor()
+      .linkDistance(60)
+      .size([width, height])
+      .on('tick', ontick)
+      //.constraints({axis: 'y', left: 0, right: 1, gap: 25})
+      //.symmetricDiffLinkLengths()
+      //.avoidOverlaps(true);*/
+    
     force = d3.layout.force()
       .size([width, height])
       .on('tick', ontick)
-      .charge(-80)
-      .linkDistance(1);
+      .charge(-120)
+      .linkDistance(100);
+     
 
     window.resize = network.resize;
     network.add(query, data);
@@ -134,6 +143,13 @@ function Network() {
     displayedReqs = displayedReqs.filter(function(d) {
       return !!num2course[d.source] && !!num2course[d.target];
     });
+    // remap endpoint ids to node references
+    displayedReqs.forEach(function(d) {
+      d.sourceId = d.source;
+      d.targetId = d.target;
+      d.source = num2course[d.source];
+      d.target = num2course[d.target];
+    });
 
     // populate nodes and links
     var nodes = coursesG.selectAll('g.node')
@@ -154,16 +170,16 @@ function Network() {
       .remove();
 
     var edges = reqsG.selectAll('g.link')
-      .data(displayedReqs, function(d) { return d.source + ',' + d.target + ',' + d.type; });
+      .data(displayedReqs, function(d) { return d.sourceId + ',' + d.targetId + ',' + d.type; });
     var newEdges = edges.enter().append('g').classed('link', true);
     newEdges.append('line')
-      .attr('stroke', '#333')
+      .attr('stroke', '#888')
       .attr('stroke-width', 1.2)
       .attr('stroke-opacity', 0.8)
       .attr('stroke-dasharray', function(d) {
         if (d.type === 'p')
           return 'none';
-        return '5, 5';
+        return '3, 5';
       })
       .attr('marker-end', function(d) { return 'url(#prereq)'; });
     edges.exit().remove();
@@ -171,7 +187,7 @@ function Network() {
     force.nodes(displayedCourses);
     force.links(displayedReqs);
 
-    force.start();
+    force.start(10,15,20);
     window.onresize = network.onresize;
   }
   // adds data to the result stack and data cache.
@@ -199,10 +215,10 @@ function Network() {
     var lines = reqLineGs.selectAll('line');
     
     lines
-      .attr('x1', function(d) { return num2course[d.source].x; })
-      .attr('y1', function(d) { return num2course[d.source].y; })
-      .attr('x2', function(d) { return num2course[d.target].x; })
-      .attr('y2', function(d) { return num2course[d.target].y; });
+      .attr('x1', function(d) { return d.source.x; })
+      .attr('y1', function(d) { return d.source.y; })
+      .attr('x2', function(d) { return d.target.x; })
+      .attr('y2', function(d) { return d.target.y; });
   }
 
   function resize() {

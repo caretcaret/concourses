@@ -66,6 +66,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
+    <!--<script src="http://marvl.infotech.monash.edu/webcola/cola.v1.min.js"></script>-->
     % if defined('script'):
     <script src="/static/js/{{script}}"></script>
     % end
