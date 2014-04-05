@@ -52,6 +52,8 @@ function Network() {
   var num2course;
   // force layout
   var force;
+  // results table
+  var results;
 
   function network(svgNode, query, data) {
     // init everything
@@ -72,18 +74,20 @@ function Network() {
     .enter().append('marker')
       .attr('id', function(d) { return d; })
       .attr('viewBox', '0 -5 10 10')
-      .attr('refX', 15)
-      .attr('refY', -1.5)
-      .attr('markerWidth', 6)
-      .attr('markerHeight', 6)
+      .attr('refX', 18)
+      .attr('refY', 0)
+      .attr('markerWidth', 8)
+      .attr('markerHeight', 8)
       .attr('orient', 'auto')
     .append('path')
-      .attr('d', 'M0,-5L10,0L0,5');
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', '#888');
     // set up force
     /*force = cola.d3adaptor()
       .linkDistance(60)
       .size([width, height])
       .on('tick', ontick)
+      .handleDisconnected(false)
       //.constraints({axis: 'y', left: 0, right: 1, gap: 25})
       //.symmetricDiffLinkLengths()
       //.avoidOverlaps(true);*/
@@ -93,7 +97,9 @@ function Network() {
       .on('tick', ontick)
       .charge(-120)
       .linkDistance(100);
-     
+    
+    // set up tables
+    results = d3.select('#results');
 
     window.resize = network.resize;
     network.add(query, data);
@@ -184,6 +190,36 @@ function Network() {
       .attr('marker-end', function(d) { return 'url(#prereq)'; });
     edges.exit().remove();
 
+    // populate tables
+    var panels = results.selectAll('panel')
+      .data(searchHistory, function(d) { return d[0]; /* query */ });
+    var newPanels = panels.enter().append('div').attr('class', 'panel panel-primary');
+    var newHeaders = newPanels.append('div')
+      .attr('class', 'panel-heading');
+    newHeaders.append('h3')
+      .attr('class', 'pull-left panel-title')
+      .text(function(d) { return d[0]; });
+    newHeaders.append('span')
+      .attr('class', 'pull-right label label-primary')
+      .text(function(d) {
+        var len = d[1].courses.length;
+        return len + (len == 1 ? ' course' : ' courses');
+      });
+    newHeaders.append('div').attr('class', 'clearfix');
+    panels.exit().remove();
+
+    var newTables = newPanels.append('table')
+      .attr('class', 'table table-striped table-hover')
+      .append('tbody');
+    var newRows = newTables.selectAll('tr')
+      .data(function(d) { return d[1].courses; /* course list */ })
+      .enter()
+      .append('tr');
+    newRows.append('td').text(function(d) { return d.number; });
+    newRows.append('td').text(function(d) { return d.name; });
+    newRows.append('td').text(function(d) { return d.units; })
+      .style('text-align', 'center');
+
     force.nodes(displayedCourses);
     force.links(displayedReqs);
 
@@ -251,7 +287,7 @@ var viz = Network();
 // the path in the url after courses/
 var query = window.location.pathname.replace(/^\/\w+\/?/, '');
 
-dataLookup({department: query}, function(data) {
+dataLookup({$query: {department: query}, $orderby: {number: 1}}, function(data) {
   console.log("Initial query is " + query);
   viz(document.querySelector('#main svg'), query, data);
 });
