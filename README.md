@@ -14,6 +14,8 @@ Third, scrape the data by running `python3 pipeline.py`. If you are editing the 
 You should end up with a folder `processed` with a bunch of `.json` files. If there are any errors, you may review them in `pipeline.log`.
 
 ## Running the website
+Install MongoDB. This will vary depending on your development environment.
+
 Install the necessary packages with `make install-site`.
 
 If you haven't already, unpack the course data with `make unpack-processed`.
