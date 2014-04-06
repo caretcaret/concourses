@@ -1,7 +1,10 @@
+from __future__ import print_function
 from bottle import route, post, run, request, template, static_file, redirect, TEMPLATE_PATH
 from pymongo import Connection
 from bson import json_util
 import os
+from functools import reduce
+import re
 
 DEVELOPMENT = True
 HERE = os.path.dirname(os.path.realpath(__file__))
@@ -40,12 +43,33 @@ def requirements():
 def data_departments():
   return static_file('data/departments.json', root=HERE+'/static')
 
+def constraint_map(item):
+  if len(item) == 0:
+    return {}
+  # regex matching
+  if re.match(r"^\d{2,2}$", item):
+    # department
+    return {'department': item}
+  if re.match(r"^\d{5,5}$", item):
+    # specific course
+    return {'number': item}
+  return {'name': {'$regex': item, '$options': 'i'}}
+
+
 @post('/data')
 def data():
-  if not request.json:
-    return {'courses': [], 'instances': []}
+  empty = json_util.dumps({'courses': []})
+  search = request.json
+  if type(request.json) is not str:
+    return empty
+  constraints = [item.strip() for item in search.strip().split(',')]
+  if len(constraints) == 0:
+    return empty
+  features = map(constraint_map, constraints)
+  query = reduce(lambda x, y: dict(list(x.items()) + list(y.items())), features)
 
-  result = db.courses.find(request.json)
+  print({'$query': query, '$orderby': {'number': 1}})
+  result = db.courses.find({'$query': query, '$orderby': {'number': 1}})
   return json_util.dumps({'courses': result})
 
 @route('/static/<filepath:path>')
