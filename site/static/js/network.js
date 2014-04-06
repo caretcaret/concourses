@@ -54,6 +54,8 @@ function Network() {
   var force;
   // results table
   var results;
+  // search box
+  var finder;
 
   function network(svgNode, query, data) {
     // init everything
@@ -96,10 +98,18 @@ function Network() {
       .size([width, height])
       .on('tick', ontick)
       .charge(-120)
-      .linkDistance(100);
+      .linkDistance(function(d) {
+        if (d.type === 'x')
+          return 25;
+        return 100;
+      });
     
     // set up tables
     results = d3.select('#results');
+
+    // set up search
+    finder = d3.select('#finder')
+      .on('submit', onsearch);
 
     window.resize = network.resize;
     network.add(query, data);
@@ -138,16 +148,22 @@ function Network() {
         .map(function(req) {
           return {source: req, target: course.number, type: 'c'}
         });
+      var xlist = course.crosslisted
+        .map(function(num) {
+          return {source: num, target: course.number, type: 'x'}
+        });
       displayedReqs.extend(prereq);
       displayedReqs.extend(coreq);
+      displayedReqs.extend(xlist);
     }
     // remove duplicates
     displayedReqs = uniqBy(displayedReqs, function(req) {
       return req.source + ',' + req.target + ',' + req.type;
     });
-    // remove edges whose endpoints don't exist
+    // remove edges whose endpoints don't exist or courses with themselves as prereqs
+    // (I'm looking at you, 02654)
     displayedReqs = displayedReqs.filter(function(d) {
-      return !!num2course[d.source] && !!num2course[d.target];
+      return !!num2course[d.source] && !!num2course[d.target] && d.target != d.source;
     });
     // remap endpoint ids to node references
     displayedReqs.forEach(function(d) {
@@ -179,21 +195,25 @@ function Network() {
       .data(displayedReqs, function(d) { return d.sourceId + ',' + d.targetId + ',' + d.type; });
     var newEdges = edges.enter().append('g').classed('link', true);
     newEdges.append('line')
-      .attr('stroke', '#888')
+      .attr('stroke', '#666')
       .attr('stroke-width', 1.2)
       .attr('stroke-opacity', 0.8)
       .attr('stroke-dasharray', function(d) {
-        if (d.type === 'p')
-          return 'none';
-        return '3, 5';
+        if (d.type === 'c')
+          return '3, 5';
+        return null;
       })
-      .attr('marker-end', function(d) { return 'url(#prereq)'; });
+      .attr('marker-end', function(d) {
+        if (d.type === 'x')
+          return null;
+        return 'url(#prereq)';
+      });
     edges.exit().remove();
 
     // populate tables
-    var panels = results.selectAll('panel')
+    var panels = results.selectAll('.panel')
       .data(searchHistory, function(d) { return d[0]; /* query */ });
-    var newPanels = panels.enter().append('div').attr('class', 'panel panel-primary');
+    var newPanels = panels.enter().insert('div').attr('class', 'panel panel-primary');
     var newHeaders = newPanels.append('div')
       .attr('class', 'panel-heading');
     newHeaders.append('h3')
@@ -228,10 +248,10 @@ function Network() {
   }
   // adds data to the result stack and data cache.
   network.add = function(query, data) {
-    if (!data)
+    if (!data || !query)
       return;
     // save data
-    searchHistory.push([query, data]);
+    searchHistory.unshift([query, data]);
     // TODO: cache displayed data
   }
 
@@ -257,6 +277,18 @@ function Network() {
       .attr('y2', function(d) { return d.target.y; });
   }
 
+  function onsearch() {
+    d3.event.preventDefault();
+    var searchNode = finder.select('#searchinput').node();
+    var query = searchNode.value;
+    searchNode.value = '';
+
+    dataLookup(query, function(data) {
+      network.add(query, data);
+      updateGraph();
+    });
+  }
+
   function resize() {
     var rect = canvas.getBoundingClientRect();
     width = rect.width;
@@ -274,20 +306,20 @@ function Network() {
 function dataLookup(query, callback) {
   console.log("Requested");
   console.log(query);
-  d3.json('/data', function(data) {
+  d3.json('/data')
+    .header('Content-Type', 'application/json')
+    .post(JSON.stringify(query), function(error, data) {
     console.log("Received");
     console.log(data);
     callback(data);
-  })
-    .header('Content-Type', 'application/json')
-    .post(JSON.stringify(query));
+  });
 }
 
 var viz = Network();
 // the path in the url after courses/
 var query = window.location.pathname.replace(/^\/\w+\/?/, '');
 
-dataLookup({$query: {department: query}, $orderby: {number: 1}}, function(data) {
+dataLookup(query, function(data) {
   console.log("Initial query is " + query);
   viz(document.querySelector('#main svg'), query, data);
 });

@@ -1,6 +1,6 @@
 % rebase('base.tpl', title='Find courses', script='network.js')
 <h3 class="page-header"><i class="fa fa-search"></i> Find courses</h3>
-<form>
+<form id="finder">
   <div class="pull-left">
     <i class="fa fa-gear"></i> Options
   </div>
@@ -20,7 +20,7 @@
   <div id="searchbox">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <input type="search" class="form-control" placeholder="Search classes, departments, or instructors">
+        <input type="search" class="form-control" placeholder="Search classes, departments, or instructors" id="searchinput">
       </div>
     </div>
   </div>
