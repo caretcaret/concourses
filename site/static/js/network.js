@@ -66,6 +66,8 @@ function Network() {
     searchHistory = [];
     courses = [];
     reqs = [];
+    displayedCourses = [];
+    displayedReqs = [];
     // reqs before courses, so the course circle masks the line
     reqsG = svg.append('g').attr('id', 'reqs');
     coursesG = svg.append('g').attr('id', 'courses');
@@ -94,19 +96,12 @@ function Network() {
       .size([width, height])
       .on('tick', ontick)
       //.handleDisconnected(false)
-      //.constraints({axis: 'y', left: 0, right: 1, gap: 25})
+      .constraints({axis: 'y', left: 0, right: 0, gap: 25})
       //.symmetricDiffLinkLengths()
       //.avoidOverlaps(true);
-    
-    /*force = d3.layout.force()
-      .size([width, height])
-      .on('tick', ontick)
-      .charge(-120)
-      .linkDistance(function(d) {
-        if (d.type === 'x')
-          return 25;
-        return 100;
-      });*/
+
+    force.nodes(displayedCourses);
+    force.links(displayedReqs);
     
     // set up tables
     results = d3.select('#results');
@@ -124,7 +119,6 @@ function Network() {
   // uses them to rebuild displayedCourses, displayedReqs, and the graph viz.
   function updateGraph() {
     // extract a list of all courses
-    displayedCourses = [];
     for (var i = 0; i < searchHistory.length; i++) {
       var history = searchHistory[i];
       var query = history[0];
@@ -136,9 +130,12 @@ function Network() {
     displayedCourses = uniqBy(displayedCourses, function(course) {
       return course.number;
     });
+    displayedCourses.forEach(function(d) {
+      d.width = 62.5;
+      d.height = 12.5;
+    });
 
     // extract reqs
-    displayedReqs = [];
     num2course = {};
     for (var i = 0; i < displayedCourses.length; i++) {
       var course = displayedCourses[i];
@@ -182,15 +179,17 @@ function Network() {
       .data(displayedCourses, function(d) { return d.number; });
     var newNodes = nodes.enter().append('g').classed('node', true);
     newNodes.append('circle')
-      .attr('cx', function(d) { return Math.random() * width; })
-      .attr('cy', function(d) { return Math.random() * height; })
       .attr('r', 7.5)
-      .style('fill', function(d) { return d3.hsl(Math.random() * 360, 0.5, 0.5).toString(); })
+      .style('fill', function(d) { return d3.hsl(Math.random() * 360, 0.5, 0.6).toString(); })
       .style('stroke', 'white')
       .style('stroke-width', 1.2)
       .call(force.drag);
     newNodes.append('text')
       .text(function(d) { return d.number; })
+      .attr('stroke', 'rgba(255, 255, 255, 0.3)')
+      .attr('stroke-width', '1px')
+      .attr('fill', 'black')
+      .attr('font-weight', 'bold')
       .call(force.drag);
     nodes.exit()
       .remove();
@@ -243,12 +242,11 @@ function Network() {
     newRows.append('td').text(function(d) { return d.name; });
     newRows.append('td').text(function(d) { return d.units; })
       .style('text-align', 'center');
-
     force.nodes(displayedCourses);
     force.links(displayedReqs);
 
-    force.start(10,15,20);
-    window.onresize = network.onresize;
+    force.start(10, 15, 20);
+    //window.onresize = network.onresize;
   }
   // adds data to the result stack and data cache.
   network.add = function(query, data) {
@@ -267,7 +265,7 @@ function Network() {
     var texts = courseNodeGs.selectAll('text')
       .attr('x', function(d) { return d.x; })
       .attr('y', function(d) { return d.y; })
-      .attr('dx', '.8em')
+      .attr('dx', '-1.5em')
       .attr('dy', '.4em');
 
     var reqLineGs = reqsG.selectAll('g.link');
