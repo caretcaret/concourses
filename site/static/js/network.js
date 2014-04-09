@@ -56,11 +56,21 @@ function Network() {
   var results;
   // search box
   var finder;
+  // event handlers
+  var zoom;
+  var drag;
 
   function network(svgNode, query, data) {
     // init everything
     canvas = svgNode;
-    svg = d3.select(svgNode);
+    zoom = d3.behavior.zoom()
+      .scaleExtent([1, 1])
+      .on('zoom', redraw);
+    svg = d3.select(svgNode)
+      .attr('pointer-events', 'all')
+      .classed('network', true) // for move cursor
+      .call(zoom);
+    resize();
     options = {};
     resize();
     searchHistory = [];
@@ -96,7 +106,7 @@ function Network() {
       .size([width, height])
       .on('tick', ontick)
       //.handleDisconnected(false)
-      .constraints({axis: 'y', left: 0, right: 0, gap: 25})
+      .constraints({axis: 'y', left: 0, right: 0, gap: 0})
       //.symmetricDiffLinkLengths()
       //.avoidOverlaps(true);
 
@@ -131,8 +141,8 @@ function Network() {
       return course.number;
     });
     displayedCourses.forEach(function(d) {
-      d.width = 62.5;
-      d.height = 12.5;
+      d.width = 60;
+      d.height = 15;
     });
 
     // extract reqs
@@ -183,14 +193,14 @@ function Network() {
       .style('fill', function(d) { return d3.hsl(Math.random() * 360, 0.5, 0.6).toString(); })
       .style('stroke', 'white')
       .style('stroke-width', 1.2)
-      .call(force.drag);
+      .call(force.drag)
+      .on("mousedown", function() { d3.event.stopPropagation(); });
     newNodes.append('text')
       .text(function(d) { return d.number; })
-      .attr('stroke', 'rgba(255, 255, 255, 0.3)')
-      .attr('stroke-width', '1px')
-      .attr('fill', 'black')
-      .attr('font-weight', 'bold')
-      .call(force.drag);
+      .attr('dx', '.8em')
+      .attr('dy', '.375em')
+      .call(force.drag)
+      .on("mousedown", function() { d3.event.stopPropagation(); });
     nodes.exit()
       .remove();
 
@@ -246,7 +256,6 @@ function Network() {
     force.links(displayedReqs);
 
     force.start(10, 15, 20);
-    //window.onresize = network.onresize;
   }
   // adds data to the result stack and data cache.
   network.add = function(query, data) {
@@ -264,9 +273,7 @@ function Network() {
       .attr('cy', function(d) { return d.y; });
     var texts = courseNodeGs.selectAll('text')
       .attr('x', function(d) { return d.x; })
-      .attr('y', function(d) { return d.y; })
-      .attr('dx', '-1.5em')
-      .attr('dy', '.4em');
+      .attr('y', function(d) { return d.y; });
 
     var reqLineGs = reqsG.selectAll('g.link');
 
@@ -297,6 +304,13 @@ function Network() {
     height = rect.height;
   }
 
+  // for zoom
+  function redraw() {
+    var transform = 'translate(' + d3.event.translate + ')';
+    coursesG.attr('transform', transform);
+    reqsG.attr('transform', transform);
+  }
+
   network.onresize = function() {
     resize();
     force.size([width, height]).start();
@@ -319,7 +333,7 @@ function dataLookup(query, callback) {
 
 var viz = Network();
 // the path in the url after courses/
-var query = window.location.pathname.replace(/^\/\w+\/?/, '');
+var query = decodeURIComponent(window.location.pathname.replace(/^\/\w+\/?/, ''));
 
 dataLookup(query, function(data) {
   console.log("Initial query is " + query);

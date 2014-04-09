@@ -74,14 +74,17 @@ body {
 }
 
 /* network svg specific */
+svg.network {
+  cursor: move;
+}
 g.node {
   z-index: 3;
 }
 g.node circle {
-	cursor: pointer;
+  cursor: pointer;
 }
 g.node text {
-	cursor: pointer;
+  cursor: pointer;
 }
 .link {
   z-index: -1;

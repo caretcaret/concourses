@@ -43,7 +43,7 @@ def requirements():
 def data_departments():
   return static_file('data/departments.json', root=HERE+'/static')
 
-def constraint_map(item):
+def item_map(item):
   if len(item) == 0:
     return {}
   # regex matching
@@ -58,21 +58,24 @@ def constraint_map(item):
     return {'number': matchobj.group(1) + matchobj.group(2)}
   return {'name': {'$regex': item, '$options': 'i'}}
 
+def clause_map(clause):
+  features = [item_map(item.strip()) for item in clause.split('&')]
+  return reduce(lambda x, y: dict(list(x.items()) + list(y.items())), features)
+
+def human_to_db(search):
+  features = [clause_map(clause.strip()) for clause in search.strip().split(',')]
+  return {'$query': {'$or': features}, '$orderby': {'number': 1}}
+
 
 @post('/data')
 def data():
   empty = json_util.dumps({'courses': []})
   search = request.json
-  if type(request.json) is not str:
+  if type(search) is not str or len(search.strip()) == 0:
     return empty
-  constraints = [item.strip() for item in search.strip().split(',')]
-  if len(constraints) == 0:
-    return empty
-  features = map(constraint_map, constraints)
-  query = reduce(lambda x, y: dict(list(x.items()) + list(y.items())), features)
-
-  print({'$query': query, '$orderby': {'number': 1}})
-  result = db.courses.find({'$query': query, '$orderby': {'number': 1}})
+  query = human_to_db(search)
+  print(query)
+  result = db.courses.find(query)
   return json_util.dumps({'courses': result})
 
 @route('/static/<filepath:path>')
