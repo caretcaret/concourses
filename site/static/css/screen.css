@@ -77,6 +77,12 @@ body {
 g.node {
   z-index: 3;
 }
+g.node circle {
+	cursor: pointer;
+}
+g.node text {
+	cursor: pointer;
+}
 .link {
   z-index: -1;
 }

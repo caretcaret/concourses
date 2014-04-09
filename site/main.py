@@ -53,6 +53,9 @@ def constraint_map(item):
   if re.match(r"^\d{5,5}$", item):
     # specific course
     return {'number': item}
+  matchobj = re.match(r"^(\d\d)\-(\d\d\d)$", item)
+  if matchobj:
+    return {'number': matchobj.group(1) + matchobj.group(2)}
   return {'name': {'$regex': item, '$options': 'i'}}
 
 
