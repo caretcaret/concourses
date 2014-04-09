@@ -77,4 +77,4 @@ def server_static(filepath):
   return static_file(filepath, root=HERE+'/static')
 
 run(host='localhost', port=int(os.environ.get("PORT", 8080)),
-  server='cherrypy', reloader=DEVELOPMENT, debug=DEVELOPMENT)
+  server='tornado', reloader=DEVELOPMENT, debug=DEVELOPMENT)
