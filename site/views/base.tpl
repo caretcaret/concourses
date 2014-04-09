@@ -50,11 +50,11 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-sm-5 col-md-5" id="sidebar">
+      <div class="col-sm-5 col-md-4" id="sidebar">
         {{!base}}
       </div>
 
-      <div class="col-sm-7 col-sm-offset-5 col-md-7 col-md-offset-5" id="main">
+      <div class="col-sm-7 col-sm-offset-5 col-md-8 col-md-offset-4" id="main">
         <!-- the main display -->
         <svg xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
@@ -66,7 +66,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
-    <!--<script src="http://marvl.infotech.monash.edu/webcola/cola.v1.min.js"></script>-->
+    <script src="http://marvl.infotech.monash.edu/webcola/cola.v2.min.js"></script>
     % if defined('script'):
     <script src="/static/js/{{script}}"></script>
     % end

@@ -85,16 +85,20 @@ function Network() {
       .attr('d', 'M0,-5L10,0L0,5')
       .attr('fill', '#888');
     // set up force
-    /*force = cola.d3adaptor()
-      .linkDistance(60)
+    force = cola.d3adaptor()
+      .linkDistance(function(d) {
+        if (d.type === 'x')
+          return 20;
+        return 70;
+      })
       .size([width, height])
       .on('tick', ontick)
-      .handleDisconnected(false)
+      //.handleDisconnected(false)
       //.constraints({axis: 'y', left: 0, right: 1, gap: 25})
       //.symmetricDiffLinkLengths()
-      //.avoidOverlaps(true);*/
+      //.avoidOverlaps(true);
     
-    force = d3.layout.force()
+    /*force = d3.layout.force()
       .size([width, height])
       .on('tick', ontick)
       .charge(-120)
@@ -102,7 +106,7 @@ function Network() {
         if (d.type === 'x')
           return 25;
         return 100;
-      });
+      });*/
     
     // set up tables
     results = d3.select('#results');
