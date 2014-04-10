@@ -77,13 +77,10 @@ body {
 svg.network {
   cursor: move;
 }
-g.node {
-  z-index: 3;
-}
-g.node circle {
+svg.network circle {
   cursor: pointer;
 }
-g.node text {
+svg.network text {
   cursor: pointer;
 }
 .link {
@@ -97,4 +94,9 @@ text {
   -ms-user-select: none;
   user-select: none;
   cursor: default;
+  -webkit-transition: fill-opacity 0.15s linear;
+  transition: fill-opacity 0.15s linear;
+}
+text.muted {
+  fill-opacity: 0.3;
 }

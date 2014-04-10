@@ -45,7 +45,7 @@ def data_departments():
 
 def item_map(item):
   if len(item) == 0:
-    return {}
+    return None
   # regex matching
   if re.match(r"^\d{2,2}$", item):
     # department
@@ -60,10 +60,16 @@ def item_map(item):
 
 def clause_map(clause):
   features = [item_map(item.strip()) for item in clause.split('&')]
-  return reduce(lambda x, y: dict(list(x.items()) + list(y.items())), features)
+  features = [feature for feature in features if feature]
+  if len(features) == 0:
+    return None
+  return {'$and': features}
 
 def human_to_db(search):
   features = [clause_map(clause.strip()) for clause in search.strip().split(',')]
+  features = [feature for feature in features if feature]
+  if len(features) == 0:
+    return None
   return {'$query': {'$or': features}, '$orderby': {'number': 1}}
 
 
@@ -75,6 +81,8 @@ def data():
     return empty
   query = human_to_db(search)
   print(query)
+  if not query:
+    return empty
   result = db.courses.find(query)
   return json_util.dumps({'courses': result})
 

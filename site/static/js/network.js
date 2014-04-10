@@ -45,6 +45,7 @@ function Network() {
   var displayedReqs;
   // <g> elements to hold the circles and lines of viz as a whole
   var coursesG;
+  var courseTextsG;
   var reqsG;
   // arrowheads
   var markers;
@@ -81,6 +82,7 @@ function Network() {
     // reqs before courses, so the course circle masks the line
     reqsG = svg.append('g').attr('id', 'reqs');
     coursesG = svg.append('g').attr('id', 'courses');
+    courseTextsG = svg.append('g').attr('id', 'courseTexts');
     num2course = {};
     // set up arrowhead shape
     svg.append('defs').selectAll('marker')
@@ -185,24 +187,37 @@ function Network() {
     });
 
     // populate nodes and links
-    var nodes = coursesG.selectAll('g.node')
-      .data(displayedCourses, function(d) { return d.number; });
-    var newNodes = nodes.enter().append('g').classed('node', true);
-    newNodes.append('circle')
+    var nodes = coursesG.selectAll('circle').data(displayedCourses, function(d) { return d.number; });
+    nodes.enter().append('circle')
       .attr('r', 7.5)
       .style('fill', function(d) { return d3.hsl(Math.random() * 360, 0.5, 0.6).toString(); })
       .style('stroke', 'white')
       .style('stroke-width', 1.2)
       .call(force.drag)
-      .on("mousedown", function() { d3.event.stopPropagation(); });
-    newNodes.append('text')
+      .on('mousedown', function() { d3.event.stopPropagation(); });
+    var texts = courseTextsG.selectAll('text').data(displayedCourses, function(d) { return d.number; });
+    texts.enter().append('text')
       .text(function(d) { return d.number; })
       .attr('dx', '.8em')
       .attr('dy', '.375em')
-      .call(force.drag)
-      .on("mousedown", function() { d3.event.stopPropagation(); });
-    nodes.exit()
-      .remove();
+      .on('mousedown', function() { d3.event.stopPropagation(); })
+      .on('mouseover', function(d1) {
+        var me = d3.select(this);
+        if (!me.classed('muted')) {
+          me.text(d1.name).attr('font-weight', 'bold');
+          courseTextsG.selectAll('text').classed('muted', function(d2) { return d1.number !== d2.number; });
+        }
+      })
+      .on('mouseout', function(d) {
+        var me = d3.select(this);
+        if (!me.classed('muted')) {
+          me.text(d.number).attr('font-weight', 'normal');
+          courseTextsG.selectAll('text').classed('muted', false);
+        }
+      })
+      .call(force.drag);
+    nodes.exit().remove();
+    texts.exit().remove();
 
     var edges = reqsG.selectAll('g.link')
       .data(displayedReqs, function(d) { return d.sourceId + ',' + d.targetId + ',' + d.type; });
@@ -263,15 +278,18 @@ function Network() {
       return;
     // save data
     searchHistory.unshift([query, data]);
+    // concat queries and set url
+    var queries = uniqBy(searchHistory.map(function(h) { return h[0]; }), function(d) { return d; });
+    var queries_str = queries.join(',');
+    history.replaceState({}, '', '/courses/' + queries_str);
     // TODO: cache displayed data
   }
 
   function ontick() {
-    var courseNodeGs = coursesG.selectAll('g.node');
-    var circles = courseNodeGs.selectAll('circle');
+    var circles = coursesG.selectAll('circle');
     circles.attr('cx', function(d) { return d.x; })
       .attr('cy', function(d) { return d.y; });
-    var texts = courseNodeGs.selectAll('text')
+    var texts = courseTextsG.selectAll('text')
       .attr('x', function(d) { return d.x; })
       .attr('y', function(d) { return d.y; });
 
@@ -308,6 +326,7 @@ function Network() {
   function redraw() {
     var transform = 'translate(' + d3.event.translate + ')';
     coursesG.attr('transform', transform);
+    courseTextsG.attr('transform', transform);
     reqsG.attr('transform', transform);
   }
 
