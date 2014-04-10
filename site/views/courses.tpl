@@ -1,6 +1,7 @@
-% rebase('base.tpl', title='Find courses', script='network.js')
+% rebase('base.tpl', title='Find courses', script='network.js', modal='course_detail.tpl')
 <h3 class="page-header"><i class="fa fa-search"></i> Find courses</h3>
 <form id="finder">
+	<!--
   <div class="pull-left">
     <i class="fa fa-gear"></i> Options
   </div>
@@ -16,11 +17,12 @@
   </div>
 
   <div class="clearfix"></div>
+  -->
 
   <div id="searchbox">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <input type="search" class="form-control" placeholder="Search classes, departments, or instructors" id="searchinput">
+        <input type="search" class="form-control" placeholder="Search classes by number or name" id="searchinput">
       </div>
     </div>
   </div>
@@ -29,3 +31,8 @@
 
 <div id="results">
 </div>
+
+<!-- Button trigger modal -->
+<button class="btn btn-primary" data-toggle="modal" data-target="#modal">
+  Launch demo modal
+</button>
