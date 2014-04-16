@@ -8,6 +8,7 @@ import pymongo
 import io
 import json
 import glob
+import os
 
 INDEX_RAW_DIRECTORY = 'raw/index/'
 INDEX_PROCESSED_DIRECTORY = 'processed/index/'
@@ -108,10 +109,13 @@ def main(tags, dept_outfile, dburl='mongodb://localhost:27017/'):
   instances_coll.insert(instances.values())
   
   # output the adjacency matrix
+  dirname = os.path.dirname(os.path.abspath(dept_outfile))
+  if not os.path.isdir(dirname):
+    os.path.makedirs(dirname)
   try:
     with io.open(dept_outfile, 'w') as f:
-      json.dump({'info': depts, 'adjacency': matrix},
-          f, ensure_ascii=False)
+      s = json.dumps({'info': depts, 'adjacency': matrix}, ensure_ascii=False)
+      f.write(s)
   except Exception as e:
     print(e)
     return False
