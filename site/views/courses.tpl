@@ -22,7 +22,7 @@
   <div id="searchbox">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <input type="search" class="form-control" placeholder="Search classes by number or name" id="searchinput">
+        <input type="search" class="form-control" placeholder="Search classes by course number, name, or department number" id="searchinput">
       </div>
     </div>
   </div>
@@ -31,8 +31,3 @@
 
 <div id="results">
 </div>
-
-<!-- Button trigger modal -->
-<button class="btn btn-primary" data-toggle="modal" data-target="#modal">
-  Launch demo modal
-</button>

@@ -126,6 +126,45 @@ function Network() {
     network.add(query, data);
     updateGraph();
   }
+
+  // inserts course specific data into the popup modal
+  function updateModal(course, instances) {
+    var modal = d3.select('#modal');
+    modal.select('#modalTitle').text(course.number + ' - ' + course.name + ' (' +  course.units + ' units' + ')');
+    modal.select('#modalMeasure1') // quality
+      .attr('class', '').text('--');
+    modal.select('#modalMeasure2') // enjoyability
+      .attr('class', '').text('--');
+    modal.select('#modalMeasure3') // difficulty
+      .attr('class', '').text('--');
+    modal.select('#modalMeasure4') // workload
+      .attr('class', '').text('--');
+
+    // spring/fall split bar
+    modal.select('#modalSpringBar')
+      .style('width', '40%');
+    modal.select('#modalSummerBar')
+      .style('width', '20%');
+    modal.select('#modalFallBar')
+      .style('width', '40%');
+
+    // related courses
+    modal.select('#modalPrereqs')
+      .text(stringifyReqs(course.prerequisites));
+    modal.select('#modalCoreqs')
+      .text(stringifyReqs(course.corequisites));
+    modal.select('#modalXlisted')
+      .text(stringifyReqs(course.crosslisted));
+
+    // text
+    if (course.description == 'None')
+      modal.select('#modalDescription').text('No description');
+    else
+      modal.select('#modalDescription').html(course.description)
+    modal.select('#modalNotes').html(course.notes || 'No notes');
+  }
+
+
   // Updates the graph whenever the graph elements change.
   // assumes that options are set to the correct values, and
   // uses them to rebuild displayedCourses, displayedReqs, and the graph viz.
@@ -264,7 +303,15 @@ function Network() {
       .enter()
       .append('tr');
     newRows.append('td').text(function(d) { return d.number; });
-    newRows.append('td').text(function(d) { return d.name; });
+    newRows.append('td').append('a')
+      .attr('href', '#')
+      .text(function(d) { return d.name; })
+      .attr('data-toggle', 'modal')
+      .attr('data-target', '#modal')
+      .on('click', function(d) {
+        d3.event.preventDefault();
+        updateModal(d, []);
+      });
     newRows.append('td').text(function(d) { return d.units; })
       .style('text-align', 'center');
     force.nodes(displayedCourses);
@@ -336,6 +383,28 @@ function Network() {
   }
 
   return network;
+}
+
+function stringifyReqs(reqs, paren) {
+  if (typeof paren === 'undefined')
+    paren = false;
+  if (typeof reqs === 'string')
+    return reqs;
+
+  if (reqs.length < 2)
+    return 'None';
+
+  var reqsClone = reqs.slice(0);
+  var op = reqsClone.shift();
+
+  if (paren) {
+    parenLeft = '(';
+    parenRight = ')';
+  } else {
+    parenLeft = '';
+    parenRight = '';
+  }
+  return parenLeft + reqsClone.map(function(d) { return stringifyReqs(reqs, true); }).join(' ' + op + ' ') + parenRight;
 }
 
 function dataLookup(query, callback) {

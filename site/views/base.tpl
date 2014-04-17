@@ -39,7 +39,9 @@
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-left">
           <li><a href="/courses">find courses</a></li>
+          <!--
           <li><a href="/requirements">check requirements</a></li>
+          -->
         </ul>
         <form class="navbar-form navbar-right" action="/courses" method="POST">
           <input type="search" class="form-control" placeholder="Search" name="query">
