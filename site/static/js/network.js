@@ -254,7 +254,10 @@ function Network() {
           courseTextsG.selectAll('text').classed('muted', false);
         }
       })
-      .call(force.drag);
+      .on('click', function(d) {
+        updateModal(d, []);
+        $('#modal').modal({});
+      });
     nodes.exit().remove();
     texts.exit().remove();
 
@@ -354,8 +357,14 @@ function Network() {
   function onsearch() {
     d3.event.preventDefault();
     var searchNode = finder.select('#searchinput').node();
-    var query = searchNode.value;
+    var query = searchNode.value.trim();
     searchNode.value = '';
+
+    // don't repeat the same query
+    for (var i = 0; i < searchHistory.length; i++) {
+      if (searchHistory[i][0] === query)
+        return;
+    }
 
     dataLookup(query, function(data) {
       network.add(query, data);
@@ -404,7 +413,7 @@ function stringifyReqs(reqs, paren) {
     parenLeft = '';
     parenRight = '';
   }
-  return parenLeft + reqsClone.map(function(d) { return stringifyReqs(reqs, true); }).join(' ' + op + ' ') + parenRight;
+  return parenLeft + reqsClone.map(function(d) { return stringifyReqs(d, true); }).join(' ' + op + ' ') + parenRight;
 }
 
 function dataLookup(query, callback) {
