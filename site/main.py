@@ -1,18 +1,30 @@
 from __future__ import print_function
 from bottle import route, post, run, request, template, static_file, redirect, TEMPLATE_PATH
-from pymongo import Connection
+from pymongo import MongoClient
 from bson import json_util
 import os
 from functools import reduce
 import re
+try:
+  from urllib.parse import urlparse
+except ImportError:
+  from urlparse import urlparse
 
 DEVELOPMENT = True
 HERE = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE_PATH.insert(0, HERE + '/views/')
-DB_URL = 'mongodb://localhost:27017/'
+DB_URL = os.environ.get('MONGOLAB_URI', 'mongodb://localhost:27017/concourses')
 
-connection = Connection(DB_URL)
-db = connection.concourses
+parsed_db_url = urlparse(DB_URL)
+DB_USERNAME = parsed_db_url.username
+DB_PASSWORD = parsed_db_url.password
+
+DB_ADDR, DB_NAME = DB_URL.rsplit('/', 1)
+
+client = MongoClient(DB_URL)
+db = client[DB_NAME]
+if DB_USERNAME and DB_PASSWORD:
+  db.authenticate(DB_USERNAME, DB_PASSWORD)
 
 @route('/')
 def home():
@@ -90,5 +102,5 @@ def data():
 def server_static(filepath):
   return static_file(filepath, root=HERE+'/static')
 
-run(host='localhost', port=int(os.environ.get("PORT", 8080)),
+run(host='0.0.0.0', port=int(os.environ.get("PORT", 8080)),
   server='tornado', reloader=DEVELOPMENT, debug=DEVELOPMENT)
