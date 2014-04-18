@@ -407,11 +407,11 @@ function stringifyReqs(reqs, paren) {
   var op = reqsClone.shift();
 
   if (paren) {
-    parenLeft = '(';
-    parenRight = ')';
+    var parenLeft = '(';
+    var parenRight = ')';
   } else {
-    parenLeft = '';
-    parenRight = '';
+    var parenLeft = '';
+    var parenRight = '';
   }
   return parenLeft + reqsClone.map(function(d) { return stringifyReqs(d, true); }).join(' ' + op + ' ') + parenRight;
 }

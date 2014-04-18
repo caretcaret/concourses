@@ -5,7 +5,8 @@ raw/
 processed/course/
 processed/index/
 # data should be regenerated
-site/static/data/
+# but we need it to work on heroku :/
+# site/static/data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
