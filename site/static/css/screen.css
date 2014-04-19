@@ -100,3 +100,7 @@ text {
 text.muted {
   fill-opacity: 0.3;
 }
+/* Course details */
+.marginless {
+  margin: 0 !important;
+}

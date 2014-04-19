@@ -101,7 +101,7 @@ function Network() {
     // set up force
     force = cola.d3adaptor()
       .linkDistance(function(d) {
-        if (d.type === 'x')
+        if (d.type === 'x') // crosslisted
           return 20;
         return 70;
       })
@@ -168,7 +168,11 @@ function Network() {
           return 'TBA';
         });
         meetings.append('p').html(function(d) {
-          return d.days + ': ' +  d.begin + ' &mdash; ' + d.end + ' @ ' + d.room + ', ' + d.campus;
+          if (d.cancelled) // british spelling
+            var canceled = ' <span class="label label-danger">canceled</span>'; // hacky D:
+          else
+            var canceled = '';
+          return d.days + ': ' +  d.begin + ' &mdash; ' + d.end + ' @ ' + d.room + ', ' + d.campus + canceled;
         });
         return meetContainer;
       }
@@ -211,10 +215,16 @@ function Network() {
         .text('None');
 
     // text
+    if (course.permission) {
+      var permission = ' <span class="label label-info">special permission required</span>';
+    }
+    else {
+      var permission = '';
+    }
     if (course.description == 'None')
-      modal.select('#modalDescription').text('No description');
+      modal.select('#modalDescription').text('No description' + permission);
     else
-      modal.select('#modalDescription').html(course.description);
+      modal.select('#modalDescription').html(course.description + permission);
     modal.select('#modalNotes').html(course.notes || 'No notes');
   }
 
