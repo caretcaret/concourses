@@ -11,7 +11,8 @@
           <div class="row">
             <div class="col-sm-3">
               <div class="thumbnail">
-                <h1 class="text-center">
+                <span class="label label-default">NO DATA</span>
+                <h1 class="text-center marginless">
                   <span id="modalMeasure1" class="text-success"></span> <small>%ile</small>
                 </h1>
                 <h4 class="text-center">Quality</h4>
@@ -19,7 +20,8 @@
             </div>
             <div class="col-sm-3">
               <div class="thumbnail">
-                <h1 class="text-center">
+                <span class="label label-default">NO DATA</span>
+                <h1 class="text-center marginless">
                   <span id="modalMeasure2" class="text-success"></span> <small>%ile</small>
                 </h1>
                 <h4 class="text-center">Enjoyability</h4>
@@ -27,7 +29,8 @@
             </div>
             <div class="col-sm-3">
               <div class="thumbnail">
-                <h1 class="text-center">
+                <span class="label label-default">NO DATA</span>
+                <h1 class="text-center marginless">
                   <span id="modalMeasure3" class="text-warning"></span> <small>%ile</small>
                 </h1>
                 <h4 class="text-center">Difficulty</h4>
@@ -35,7 +38,8 @@
             </div>
             <div class="col-sm-3">
               <div class="thumbnail">
-                <h1 class="text-center">
+                <span class="label label-default">NO DATA</span>
+                <h1 class="text-center marginless">
                   <span id="modalMeasure4" class="text-danger"></span> <small>hr/wk</small>
                 </h1>
                 <h4 class="text-center">Workload</h4>
