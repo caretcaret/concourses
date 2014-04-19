@@ -42,13 +42,13 @@
               </div>
             </div>
           </div>
-          <!--
+          
           <div class="progress">
             <div class="progress-bar progress-bar-success" style="width: 90%" id="modalSpringBar">Spring</div>
             <div class="progress-bar progress-bar-info" style="width: 0%" id="modalSummerBar">Summer</div>
             <div class="progress-bar progress-bar-warning" style="width: 10%" id="modalFallBar">Fall</div>
           </div>
-          -->
+          
           <dl class="dl-horizontal">
             <dt>Prerequisites</dt>
             <dd id="modalPrereqs"></dd>
@@ -59,15 +59,15 @@
           </dl>
         </div>
 
-        <h4>Details</h4>
-        <p id="modalDescription">
-        <!--<a href="#"><span class="badge badge-default">#typetheory</span></a><a href="#"><span class="badge badge-default">#sml</span></a><a href="#"><span class="badge badge-default">#logic</span></a></p>-->
-        <h4>Notes</h4>
+        <h3>Description</h3>
+        <p id="modalDescription"></p>
+        <!--<a href="#"><span class="badge badge-default"></span></a>-->
+        <h3>Notes</h3>
         <p id="modalNotes"></p>
-        <!--
-        <h4>Schedule</h4>
-        <p>Insert here</p>
-        -->
+        
+        <h3>Schedule</h3>
+        <div id="modalSchedule"></div>
+        
       </div>
     </div>
   </div>

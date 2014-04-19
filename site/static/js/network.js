@@ -128,8 +128,57 @@ function Network() {
   }
 
   // inserts course specific data into the popup modal
-  function updateModal(course, instances) {
+  function updateModal(course) {
     var modal = d3.select('#modal');
+
+    // clear the schedule of old data
+    modal.select('#modalSchedule').selectAll('div').remove();
+    // fetch schedule data
+    detailsLookup(course.number, function(data) {
+      var instances = data.instances;
+      // sort instances: fall->summer->spring, then descending years
+      instances.sort(function(left, right) {
+        var a = left.tag;
+        var b = right.tag;
+        var aYear = +a.substring(1);
+        var bYear = +b.substring(1);
+        if (aYear != bYear)
+          return bYear - aYear; // show sessions in reverse order
+        var semOrder = {'S': 1, 'M': 2, 'F': 3};
+        return semOrder[b[0]] - semOrder[a[0]];
+      });
+      
+      // insert schedule into modal; one ul per semester
+      var semesters = modal.select('#modalSchedule').selectAll('div')
+        .data(instances).enter().append('div');
+      semesters.append('h4').append('small').text(function(d) { return d.session; });
+      var semContainer = semesters.append('ul').classed('media-list', true).selectAll('li')
+        .data(function(d) { return d.lectures; }).enter();
+      // insert lectures per semester
+      function populateMeetingInfo(parent) {
+        var lectures = parent.append('li').classed('media', true);
+        lectures.append('div').classed('pull-left', true)
+          .append('h4').text(function(d) { return d.name; });
+        // insert meetings per lecture
+        var meetContainer = lectures.append('div').classed('media-body', true);
+        var meetings = meetContainer.selectAll('div').data(function(d) { return d.meetings; }).enter().append('div');
+        meetings.append('h4').classed('media-heading', true).text(function(d) {
+          if (d.instructors.length > 0)
+            return d.instructors.join('; ');
+          return 'TBA';
+        });
+        meetings.append('p').html(function(d) {
+          return d.days + ': ' +  d.begin + ' &mdash; ' + d.end + ' @ ' + d.room + ', ' + d.campus;
+        });
+        return meetContainer;
+      }
+      var meetContainer = populateMeetingInfo(semContainer);
+      var recContainer = meetContainer.selectAll('ul')
+        .data(function(d) { return d.recitations; }).enter()
+        .append('ul').classed('media-list', true);
+      var recitations = populateMeetingInfo(recContainer);
+    });
+
     modal.select('#modalTitle').text(course.number + ' - ' + course.name + ' (' +  course.units + ' units' + ')');
     modal.select('#modalMeasure1') // quality
       .attr('class', '').text('--');
@@ -141,26 +190,31 @@ function Network() {
       .attr('class', '').text('--');
 
     // spring/fall split bar
+    var totalAvailability = course.availability[0] + course.availability[1] + course.availability[2];
     modal.select('#modalSpringBar')
-      .style('width', '40%');
+      .style('width', 100 * course.availability[0] / totalAvailability + '%');
     modal.select('#modalSummerBar')
-      .style('width', '20%');
+      .style('width', 100 * course.availability[1] / totalAvailability + '%');
     modal.select('#modalFallBar')
-      .style('width', '40%');
+      .style('width', 100 * course.availability[2] / totalAvailability + '%');
 
     // related courses
     modal.select('#modalPrereqs')
       .text(stringifyReqs(course.prerequisites));
     modal.select('#modalCoreqs')
       .text(stringifyReqs(course.corequisites));
-    modal.select('#modalXlisted')
-      .text(stringifyReqs(course.crosslisted));
+    if (course.crosslisted.length > 0)
+      modal.select('#modalXlisted')
+        .text(course.crosslisted.join(', '));
+    else
+      modal.select('#modalXlisted')
+        .text('None');
 
     // text
     if (course.description == 'None')
       modal.select('#modalDescription').text('No description');
     else
-      modal.select('#modalDescription').html(course.description)
+      modal.select('#modalDescription').html(course.description);
     modal.select('#modalNotes').html(course.notes || 'No notes');
   }
 
@@ -170,6 +224,8 @@ function Network() {
   // uses them to rebuild displayedCourses, displayedReqs, and the graph viz.
   function updateGraph() {
     // extract a list of all courses
+    displayedCourses = [];
+    displayedReqs = [];
     for (var i = 0; i < searchHistory.length; i++) {
       var history = searchHistory[i];
       var query = history[0];
@@ -255,8 +311,8 @@ function Network() {
         }
       })
       .on('click', function(d) {
-        updateModal(d, []);
-        $('#modal').modal({});
+        updateModal(d);
+        $('#modal').modal();
       });
     nodes.exit().remove();
     texts.exit().remove();
@@ -289,8 +345,22 @@ function Network() {
     newHeaders.append('h3')
       .attr('class', 'pull-left panel-title')
       .text(function(d) { return d[0]; });
+    newHeaders.append('button')
+      .classed('close', true)
+      .html('&times;')
+      .on('click', function(d) {
+        // remove from history
+        for (var i = 0; i < searchHistory.length; i++) {
+          if (searchHistory[i] === d) {
+            searchHistory.splice(i, 1);
+            break;
+          }
+        }
+        replaceURL();
+        updateGraph();
+      });
     newHeaders.append('span')
-      .attr('class', 'pull-right label label-primary')
+      .attr('class', 'label label-primary')
       .text(function(d) {
         var len = d[1].courses.length;
         return len + (len == 1 ? ' course' : ' courses');
@@ -313,7 +383,7 @@ function Network() {
       .attr('data-target', '#modal')
       .on('click', function(d) {
         d3.event.preventDefault();
-        updateModal(d, []);
+        updateModal(d);
       });
     newRows.append('td').text(function(d) { return d.units; })
       .style('text-align', 'center');
@@ -329,10 +399,14 @@ function Network() {
     // save data
     searchHistory.unshift([query, data]);
     // concat queries and set url
+    replaceURL();
+    // TODO: cache displayed data
+  }
+
+  function replaceURL() {
     var queries = uniqBy(searchHistory.map(function(h) { return h[0]; }), function(d) { return d; });
     var queries_str = queries.join(',');
     history.replaceState({}, '', '/courses/' + queries_str);
-    // TODO: cache displayed data
   }
 
   function ontick() {
@@ -426,6 +500,18 @@ function dataLookup(query, callback) {
     console.log(data);
     callback(data);
   });
+}
+
+function detailsLookup(query, callback) {
+  console.log("Requested details");
+  console.log(query);
+  d3.json('/data/details')
+    .header('Content-Type', 'application/json')
+    .post(JSON.stringify(query), function(error, data) {
+      console.log("Received");
+      console.log(data);
+      callback(data);
+    });
 }
 
 var viz = Network();

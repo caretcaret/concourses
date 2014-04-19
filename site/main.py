@@ -30,6 +30,10 @@ if DB_USERNAME and DB_PASSWORD:
 def home():
   return template('home')
 
+@route('/evaluation')
+def evaluation():
+  return template('eval')
+
 @route('/courses')
 @route('/courses/')
 @route('/courses/<query:path>')
@@ -85,6 +89,18 @@ def human_to_db(search):
   return {'$query': {'$or': features}, '$orderby': {'number': 1}}
 
 
+@post('/data/details')
+def data_details():
+  """Fetch all instances for a course number."""
+  empty = json_util.dumps({'instances': []})
+  search = request.json
+  if type(search) is not str or len(search.strip()) == 0:
+    return empty
+  query = {'number': search}
+  print("Details fetch:", query)
+  result = db.instances.find(query)
+  return json_util.dumps({'instances': result})
+
 @post('/data')
 def data():
   empty = json_util.dumps({'courses': []})
@@ -92,7 +108,7 @@ def data():
   if type(search) is not str or len(search.strip()) == 0:
     return empty
   query = human_to_db(search)
-  print(query)
+  print("List search:", query)
   if not query:
     return empty
   result = db.courses.find(query)
