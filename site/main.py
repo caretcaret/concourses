@@ -72,7 +72,7 @@ def item_map(item):
   matchobj = re.match(r"^(\d\d)\-(\d\d\d)$", item)
   if matchobj:
     return {'number': matchobj.group(1) + matchobj.group(2)}
-  return {'name': {'$regex': item, '$options': 'i'}}
+  return {'name': {'$regex': re.escape(item), '$options': 'i'}}
 
 def clause_map(clause):
   features = [item_map(item.strip()) for item in clause.split('&')]
