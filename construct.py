@@ -8,6 +8,7 @@ import pymongo
 import io
 import json
 import glob
+import re
 import os
 
 INDEX_RAW_DIRECTORY = 'raw/index/'
@@ -50,6 +51,29 @@ def dept_info():
   return depts
 
 def offering_generator(tags):
+  # first get the counts of courses among all years to determine
+  # distribution of course offerings among terms
+  dist = {}
+  for filename in glob.iglob(COURSE_PROCESSED_DIRECTORY + '*/*.json'):
+    matchobj = re.search(r"([SMF])\d\d/(\d{5,5}).json", filename)
+    if not matchobj:
+      continue
+    tag = matchobj.group(1)
+    number = matchobj.group(2)
+    if tag == 'S':
+      bump = (1, 0, 0)
+    elif tag == 'M':
+      bump = (0, 1, 0)
+    elif tag == 'F':
+      bump = (0, 0, 1)
+    else:
+      continue
+    if number not in dist:
+      dist[number] = bump
+    else:
+      # increment counts
+      dist[number] = tuple(map(sum, zip(dist[number], bump)))
+  
   for tag in tags:
     for filename in glob.iglob(COURSE_PROCESSED_DIRECTORY + tag + '/*.json'):
       offering = parse_offering(filename)
@@ -66,8 +90,23 @@ def offering_generator(tags):
             'mini', 'name', 'notes', 'number', 'permission', 'units',
             'urls']}
       course['department'] = dept
+      course['availability'] = list(dist[number])
       instance = {k: v for k, v in offering.items() if k in
           ['reservations', 'session', 'lectures', 'number']}
+      # turn lectures obj into list
+      instance['lectures'] = list(sorted(
+              (dict(list(lecobj.items()) + [('name', lec)])
+          for lec, lecobj in instance['lectures'].items()),
+              key=lambda lec: lec['name']))
+      # turn recitation objs into lists, sort lectures by name
+      for lec in instance['lectures']:
+        if 'recitations' in lec:
+          lec['recitations'] = list(sorted(
+              (dict(list(recobj.items()) + [('name', rec)])
+              for rec, recobj in lec['recitations'].items()),
+              key=lambda rec: rec['name']))
+        else:
+          lec['recitations'] = [] # homogeneity
       instance['tag'] = tag
 
       yield (tag, number, course, instance)
