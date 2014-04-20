@@ -55,13 +55,13 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-sm-5 col-md-4" id="sidebar">
-        {{!base}}
-      </div>
-
       <div class="col-sm-7 col-sm-offset-5 col-md-8 col-md-offset-4" id="main">
         <!-- the main display -->
         <svg xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <div class="col-sm-5 col-md-4" id="sidebar">
+        {{!base}}
       </div>
     </div>
   </div>
@@ -79,5 +79,13 @@
     % if defined('script'):
     <script src="/static/js/{{script}}"></script>
     % end
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-50113999-1', 'concours.es');
+      ga('send', 'pageview');
+    </script>
   </body>
 </html>

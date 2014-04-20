@@ -47,7 +47,7 @@
             </div>
           </div>
           
-          <div class="progress">
+          <div class="progress" id="modalTermDist" data-toggle="tooltip">
             <div class="progress-bar progress-bar-success" style="width: 90%" id="modalSpringBar">Spring</div>
             <div class="progress-bar progress-bar-info" style="width: 0%" id="modalSummerBar">Summer</div>
             <div class="progress-bar progress-bar-warning" style="width: 10%" id="modalFallBar">Fall</div>
