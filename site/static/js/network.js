@@ -201,6 +201,17 @@ function Network() {
       .style('width', 100 * course.availability[1] / totalAvailability + '%');
     modal.select('#modalFallBar')
       .style('width', 100 * course.availability[2] / totalAvailability + '%');
+    var trend = (course.availability[0] == totalAvailability) ? 'This course has only been offered in the spring.' :
+                (course.availability[1] == totalAvailability) ? 'This course has only been offered in the summer.' :
+                (course.availability[2] == totalAvailability) ? 'This course has only been offered in the fall.' :
+                (course.availability[0] / totalAvailability > 0.65) ? 'This course has been offered primarily in the spring.' :
+                (course.availability[1] / totalAvailability > 0.65) ? 'This course has been offered primarily in the summer.' :
+                (course.availability[2] / totalAvailability > 0.65) ? 'This course has been offered primarily in the fall.' :
+                (course.availability[1] === 0) ? 'This course has been offered in both the spring and fall.' :
+                'This course has been offered regularly in the past.'
+    modal.select('#modalTermDist')
+      .attr('title', trend);
+    $('#modalTermDist').tooltip('fixTitle');
 
     // related courses
     modal.select('#modalPrereqs')
@@ -384,7 +395,27 @@ function Network() {
     var newRows = newTables.selectAll('tr')
       .data(function(d) { return d[1].courses; /* course list */ })
       .enter()
-      .append('tr');
+      .append('tr')
+      .on('mouseover', function(d1) {
+        courseTextsG.selectAll('text')
+          .classed('muted', function(d2) { return d1.number !== d2.number; })
+          .text(function(d2) {
+            if (d1.number === d2.number)
+              return d2.name;
+            return d2.number;
+          })
+          .attr('font-weight', function(d2) {
+            if (d1.number === d2.number)
+              return 'bold';
+            return null;
+          });
+      })
+      .on('mouseout', function(d1) {
+        courseTextsG.selectAll('text')
+          .classed('muted', false)
+          .attr('font-weight', null)
+          .text(function(d2) { return d2.number; });
+      });
     newRows.append('td').text(function(d) { return d.number; });
     newRows.append('td').append('a')
       .attr('href', '#')

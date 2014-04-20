@@ -10,7 +10,7 @@ try:
 except ImportError:
   from urlparse import urlparse
 
-DEVELOPMENT = True
+DEVELOPMENT = not bool(os.environ.get('DYNO', ''))
 HERE = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE_PATH.insert(0, HERE + '/views/')
 DB_URL = os.environ.get('MONGOLAB_URI', 'mongodb://localhost:27017/concourses')
