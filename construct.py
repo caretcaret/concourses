@@ -93,6 +93,8 @@ def offering_generator(tags):
       course['availability'] = list(dist[number])
       instance = {k: v for k, v in offering.items() if k in
           ['reservations', 'session', 'lectures', 'number']}
+      # denormalize with a list of instructors
+      instructors = set()
       # turn lectures obj into list
       instance['lectures'] = list(sorted(
               (dict(list(lecobj.items()) + [('name', lec)])
@@ -100,13 +102,20 @@ def offering_generator(tags):
               key=lambda lec: lec['name']))
       # turn recitation objs into lists, sort lectures by name
       for lec in instance['lectures']:
+        for meeting in lec['meetings']:
+          instructors |= set(meeting['instructors'])
         if 'recitations' in lec:
           lec['recitations'] = list(sorted(
               (dict(list(recobj.items()) + [('name', rec)])
               for rec, recobj in lec['recitations'].items()),
               key=lambda rec: rec['name']))
+          for rec in lec['recitations']:
+            for meeting in rec['meetings']:
+              instructors |= set(meeting['instructors'])
         else:
           lec['recitations'] = [] # homogeneity
+      # denormalize with a list of instructors
+      instance['instructors'] = list(instructors)
       instance['tag'] = tag
 
       yield (tag, number, course, instance)
@@ -161,4 +170,7 @@ def main(tags, dept_outfile, dburl='mongodb://localhost:27017/'):
   return True
 
 if __name__ == '__main__':
-  main(['S13', 'M13', 'F13', 'S14', 'M14', 'F14'], DEPARTMENTS_OUTPUT_FILE)
+  main(['S06', 'M06', 'F06', 'S07', 'M07', 'F07', 'S08', 'M08', 'F08',
+        'S09', 'M09', 'F09', 'S10', 'M10', 'F10', 'S11', 'M11', 'F11',
+        'S12', 'M12', 'F12', 'S13', 'M13', 'F13', 'S14', 'M14', 'F14'],
+        DEPARTMENTS_OUTPUT_FILE)

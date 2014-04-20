@@ -23,7 +23,7 @@
   <div class="panel panel-primary">
     <div class="panel-heading">
       <form id="finder">
-        <input type="search" class="form-control" placeholder="Search classes by course number, name, or department number" id="searchinput">
+        <input type="search" class="form-control" placeholder="Search classes by number, name, instructor, or department" id="searchinput">
       </form>
     </div>
     <div>
@@ -33,12 +33,13 @@
         <p>You can hover over a course's number to view it's full name, and click on its name to show information about the course. You can also drag around the circles to rearrange the graph.</p>
         <h4>Example searches</h4>
         <ul>
-          <li>A department: 98</li>
-          <li>A specific course: 15213</li>
-          <li>A course name: non-majors</li>
-          <li>Courses an instructor has taught: Smith</li>
-          <li>Requiring multiple conditions: photography &amp; 79</li>
-          <li>Requiring at least one condition of many: materials, quantum physics</li>
+          <li>A department: <code>98</code></li>
+          <li>A specific course: <code>15213</code>, <code>15-213</code></li>
+          <li>A course name: <code>non-majors</code></li>
+          <li>Courses an instructor has taught: <code>[Smith]</code></li>
+          <li>Matching multiple conditions: <code>photography &amp; 79</code></li>
+          <li>Filter by courses taught in a semester: <code>85 &amp; F14</code></li>
+          <li>Matching at least one condition of many: <code>materials, quantum physics</code></li>
         </ul>
       </div>
       <button data-toggle="collapse" data-target="#search_help" class="btn btn-link btn-xs btn-block dropdown-toggle">
