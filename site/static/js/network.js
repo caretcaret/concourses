@@ -169,10 +169,10 @@ function Network() {
         });
         meetings.append('p').html(function(d) {
           if (d.cancelled) // british spelling
-            var canceled = ' <span class="label label-danger">canceled</span>'; // hacky D:
+            var canceled = '<span class="label label-danger">canceled</span> '; // hacky D:
           else
             var canceled = '';
-          return d.days + ': ' +  d.begin + ' &mdash; ' + d.end + ' @ ' + d.room + ', ' + d.campus + canceled;
+          return canceled + d.days + ': ' +  d.begin + ' &mdash; ' + d.end + ' @ ' + d.room + ', ' + d.campus;
         });
         return meetContainer;
       }
@@ -201,14 +201,15 @@ function Network() {
       .style('width', 100 * course.availability[1] / totalAvailability + '%');
     modal.select('#modalFallBar')
       .style('width', 100 * course.availability[2] / totalAvailability + '%');
-    var trend = (course.availability[0] == totalAvailability) ? 'This course has only been offered in the spring.' :
-                (course.availability[1] == totalAvailability) ? 'This course has only been offered in the summer.' :
-                (course.availability[2] == totalAvailability) ? 'This course has only been offered in the fall.' :
-                (course.availability[0] / totalAvailability > 0.65) ? 'This course has been offered primarily in the spring.' :
-                (course.availability[1] / totalAvailability > 0.65) ? 'This course has been offered primarily in the summer.' :
-                (course.availability[2] / totalAvailability > 0.65) ? 'This course has been offered primarily in the fall.' :
-                (course.availability[1] === 0) ? 'This course has been offered in both the spring and fall.' :
-                'This course has been offered regularly in the past.'
+    var trend = 'This course has been offered ' + (
+                (course.availability[0] == totalAvailability) ? 'only in the spring.' :
+                (course.availability[1] == totalAvailability) ? 'only in the summer.' :
+                (course.availability[2] == totalAvailability) ? 'only in the fall.' :
+                (course.availability[0] / totalAvailability > 0.65) ? 'primarily in the spring.' :
+                (course.availability[1] / totalAvailability > 0.65) ? 'primarily in the summer.' :
+                (course.availability[2] / totalAvailability > 0.65) ? 'primarily in the fall.' :
+                (course.availability[1] === 0) ? 'in both the spring and fall.' :
+                'regularly in the past.')
     modal.select('#modalTermDist')
       .attr('title', trend);
     $('#modalTermDist').tooltip('fixTitle');
@@ -338,6 +339,8 @@ function Network() {
     nodes.exit().remove();
     texts.exit().remove();
 
+    // temporary hacky fix to edges being decoherent with the possibly new canonical course, kinda slow
+    reqsG.selectAll('g.link').remove();
     var edges = reqsG.selectAll('g.link')
       .data(displayedReqs, function(d) { return d.sourceId + ',' + d.targetId + ',' + d.type; });
     var newEdges = edges.enter().append('g').classed('link', true);
@@ -355,7 +358,7 @@ function Network() {
           return null;
         return 'url(#prereq)';
       });
-    edges.exit().remove();
+    //edges.exit().remove();
 
     // populate tables
     var panels = results.selectAll('.panel')

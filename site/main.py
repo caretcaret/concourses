@@ -72,6 +72,16 @@ def item_map(item):
   matchobj = re.match(r"^(\d\d)\-(\d\d\d)$", item)
   if matchobj:
     return {'number': matchobj.group(1) + matchobj.group(2)}
+  if re.match(r"^[SMFsmf]\d\d$", item):
+    # find instances
+    courses = db.instances.find({'tag': item.upper()}, {'number': 1})
+    return {'number': {'$in': [course['number'] for course in courses]}}
+  matchobj = re.match(r"^\[(.+)\]$", item)
+  if matchobj:
+    instructor = matchobj.group(1)
+    courses = db.instances.find({'instructors': {'$regex': '^' + re.escape(instructor), '$options': 'i'}},
+                                {'number': 1})
+    return {'number': {'$in': [course['number'] for course in courses]}}
   return {'name': {'$regex': re.escape(item), '$options': 'i'}}
 
 def clause_map(clause):
@@ -94,24 +104,24 @@ def data_details():
   """Fetch all instances for a course number."""
   empty = json_util.dumps({'instances': []})
   search = request.json
+  print("/data/details", search)
   if type(search) is not str or len(search.strip()) == 0:
     return empty
   query = {'number': search}
-  print("Details fetch:", query)
-  result = db.instances.find(query)
+  result = db.instances.find(query, {'_id': 0, 'instructors': 0})
   return json_util.dumps({'instances': result})
 
 @post('/data')
 def data():
   empty = json_util.dumps({'courses': []})
   search = request.json
+  print("/data", search)
   if type(search) is not str or len(search.strip()) == 0:
     return empty
   query = human_to_db(search)
-  print("List search:", query)
   if not query:
     return empty
-  result = db.courses.find(query)
+  result = db.courses.find(query, {'_id': 0})
   return json_util.dumps({'courses': result})
 
 @route('/static/<filepath:path>')
