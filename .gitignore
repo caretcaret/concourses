@@ -7,6 +7,8 @@ processed/index/
 # data should be regenerated
 # but we need it to work on heroku :/
 # site/static/data/
+processed.tgz
+raw.tgz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

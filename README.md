@@ -1,8 +1,6 @@
 # CMU course graph visualizer
 
 ## Scraping course information
-Note: You do not need to do this to run the site! The data is already stored in `processed.tgz`. To get the pregenerated data, just run `make unpack-processed`.
-
 This relies on CMU's new schedule of classes site at `https://enr-apps.as.cmu.edu/open/SOC/SOCServlet/search`. This works as of March 2014.
 
 First, install the necessary packages into your Python 3 installation. You can use `make install-scrape` to do so. You may end up installing them into Python 2, in which case, use `pip3` manually.
@@ -27,19 +25,3 @@ If you want, set a port number with `export PORT=<number>`. The default port is 
 For development, just run `python site/main.py` and go to `http://localhost:<port number>`.
 
 Sometimes, on a force quit with <kbd>Ctrl</kbd>+<kbd>C</kbd>, the bottle server doesn't actually stop and it doesn't release its port. On Mac OS X, you can run `lsof -i :<port number>` and `kill <pid>` to kill the python process.
-
-## Alternate instructions
-Make sure to have Python 3.4.0 or later.
-`python3 -m venv <myenv>`
-`cd <myenv>`
-`source bin/activate` for bash, or `Scripts/activate.bat` for Windows
-`git clone https://github.com/dylu/techcomm.git`
-`cd techcomm`
-`pip install -r requirements.txt`
-`python unpack.py processed`
-`python construct.py`
-`python site/main.py`
-
-...
-
-`deactivate`
